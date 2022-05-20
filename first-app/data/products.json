@@ -1,1 +1,31 @@
-[{"title":"New Book","imageUrl":"bock","price":"192.29","description":"NEW BOOK!"},{"title":"Another book","imageUrl":"book2","description":"Another Book","price":"32.34"}]
+[
+  {
+    "id": "1",
+    "title": "New Book",
+    "imageUrl": "bock",
+    "price": "192.29",
+    "description": "NEW BOOK!",
+    "quantity": null
+  },
+  {
+    "id": "2",
+    "title": "Another book",
+    "imageUrl": "book2",
+    "description": "Another Book",
+    "price": "32.34"
+  },
+  {
+    "title": "Third Book",
+    "imageUrl": "random",
+    "description": "This is a third book",
+    "price": "23.32",
+    "id": "0.09024436441427941"
+  },
+  {
+    "title": "4th Product",
+    "imageUrl": "asd",
+    "description": "New Porduct",
+    "price": "342.23",
+    "id": "0.08484095884413967"
+  }
+]
