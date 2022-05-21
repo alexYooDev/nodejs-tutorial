@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 
 const path = require('path');
 
-const db = require('./util/database');
+const sequelize = require('./util/database');
 
 const app = express();
 
@@ -15,14 +15,6 @@ const adminRouter = require('./routes/admin');
 const shopRouter = require('./routes/shop');
 
 const errorController = require('./controllers/errors');
-
-db.execute('SELECT * FROM products;')
-  .then((result) => {
-    console.log(result[0]);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
 
 //next를 호출해야 다음 미들웨어를 실행. 그렇지 않다면 미들웨어는 실행 종료한다.
 
@@ -37,4 +29,9 @@ app.use(shopRouter);
 
 app.use(errorController.get404);
 
-app.listen(5002);
+sequelize
+  .sync()
+  .then((result) => {
+    app.listen(5002);
+  })
+  .catch((error) => console.log(error));
