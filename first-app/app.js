@@ -8,6 +8,10 @@ const sequelize = require('./util/database');
 
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -27,6 +31,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // 정적으로 파일 시스템에 접근하여 css 연결
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 유저 로그인 대체
 app.use((req, res, next) => {
   User.findByPk(1)
     .then((user) => {
@@ -44,6 +49,13 @@ app.use(errorController.get404);
 // 데이터 베이스 내 테이블의 관계를 정의한다.
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
 
 // run when npm starts!
 sequelize
@@ -61,7 +73,9 @@ sequelize
     return user;
   })
   .then((user) => {
-    console.log(user);
+    return user.createCart();
+  })
+  .then((cart) => {
     app.listen(5002);
   })
   .catch((error) => console.log(error));
