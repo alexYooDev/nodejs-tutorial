@@ -8,6 +8,17 @@ const targetPath = path.join(
 );
 
 module.exports = class Cart {
+  static getCart(callback) {
+    fs.readFile(targetPath, (err, data) => {
+      const cart = JSON.parse(data);
+      if (err) {
+        callback(null);
+      } else {
+        callback(cart);
+      }
+    });
+  }
+
   static addProduct(id, price) {
     fs.readFile(targetPath, (err, data) => {
       let cart = { products: [], totalPrice: 0 };
@@ -32,6 +43,32 @@ module.exports = class Cart {
       fs.writeFile(targetPath, JSON.stringify(cart), (err) => {
         console.log(err);
       });
+    });
+  }
+  static deleteProduct(id, productPrice) {
+    fs.readFile(targetPath, (err, data) => {
+      if (err) {
+        return;
+      }
+
+      let cart = JSON.parse(data);
+      const updatedCart = { ...cart };
+
+      const product = updatedCart.products.find((product) => product.id === id);
+
+      if (!product) {
+        return;
+      }
+
+      const productQuantity = product.quantity;
+      updatedCart.products = updatedCart.products.filter(
+        (product) => product.id !== id
+      );
+      updatedCart.totalPrice -= productPrice * productQuantity;
+
+      fs.writeFile(targetPath, JSON.stringify(updatedCart), (err) =>
+        console.log(err)
+      );
     });
   }
 };
