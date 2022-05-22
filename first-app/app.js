@@ -4,14 +4,7 @@ const bodyParser = require('body-parser');
 
 const path = require('path');
 
-const sequelize = require('./util/database');
-
-const Product = require('./models/product');
-const User = require('./models/user');
-const Cart = require('./models/cart');
-const CartItem = require('./models/cart-item');
-const Order = require('./models/order');
-const OrderItem = require('./models/order-item');
+const mongoConnect = require('./util/database').mongoConnect;
 
 const app = express();
 
@@ -21,7 +14,9 @@ app.set('views', 'views');
 const adminRouter = require('./routes/admin');
 const shopRouter = require('./routes/shop');
 
-const errorController = require('./controllers/errors');
+const User = require('./models/user');
+
+// const errorController = require('./controllers/errors');
 
 //next를 호출해야 다음 미들웨어를 실행. 그렇지 않다면 미들웨어는 실행 종료한다.
 
@@ -33,49 +28,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 유저 로그인 대체
 app.use((req, res, next) => {
-  User.findByPk(1)
+  User.findById('6289e715b85c82192811d121')
     .then((user) => {
-      req.user = user;
+      req.user = new User(user.name, user.email, user.cart, user._id);
       next();
     })
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      console.log(error);
+    });
 });
 
 app.use('/admin', adminRouter.router);
 app.use(shopRouter);
 
-app.use(errorController.get404);
+// app.use(errorController.get404);
+
+mongoConnect(() => {
+  app.listen(5002);
+});
 
 // 데이터 베이스 내 테이블의 관계를 정의한다.
-Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
-User.hasMany(Product);
-User.hasOne(Cart);
-Cart.belongsTo(User);
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
-Order.belongsTo(User);
-User.hasMany(Order);
-Order.belongsToMany(Product, { through: OrderItem });
-
-// run when npm starts!
-sequelize
-  .sync()
-  .then((result) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      User.create({
-        name: 'Alex',
-        email: 'test@test.com',
-      });
-    }
-    return user;
-  })
-  .then((user) => {
-    return user.createCart();
-  })
-  .then((cart) => {
-    app.listen(5002);
-  })
-  .catch((error) => console.log(error));
